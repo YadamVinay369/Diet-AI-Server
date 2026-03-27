@@ -8,11 +8,6 @@ class UserBase(BaseModel):
     
 class UserCreate(UserBase):
     password: str = Field(...,min_length=6)
-    time_frame: Optional[int] = Field(default=None, ge=1)
-    start_date: Optional[date] = None
-    overall_nutrient_sheet: Optional[Dict[str, Any]] = Field(default=None)
-    attendance: Optional[List[bool]] = Field(default=None)
-    frequency: Optional[List[int]] = Field(default=None)
     
 class UserInDB(UserBase):
     hashed_password: str

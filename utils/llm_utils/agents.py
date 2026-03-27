@@ -141,8 +141,8 @@ def calculate_diet_score_with_penalty(
                 #     day = (start_dt + timedelta(days=day_idx)).strftime("%d-%m-%Y")
                 #     cheat_days.add(day)
 
-            score = math.exp(-penalty_factor * deviation_ratio)
-            day_scores.append(score)
+            score = math.exp(-penalty_factor * deviation_ratio) 
+            day_scores.append(score) 
 
         nutrient_scores.append(sum(day_scores) / len(day_scores))
 
@@ -169,7 +169,7 @@ def calculate_diet_score_with_penalty(
 
     # 5️⃣ Final Score (weights + discipline)
     base_score = avg_nutrient_score * 0.7 + avg_freq_penalty * 0.2 + missing_penalty * 0.1
-    final_score = base_score * (0.8 + 0.2 * discipline_bonus)  # 20% max bonus from discipline
+    final_score = base_score * 0.8 + 0.2 * discipline_bonus  # 20% max bonus from discipline
     final_score *= 100
 
     return round(final_score, 2), cheat_days

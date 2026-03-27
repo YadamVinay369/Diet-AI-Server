@@ -48,6 +48,22 @@ async def start(payload: TimeFrame,user_id: dict = Depends(get_current_user)):
             detail=f"An error occurred at start: {str(e)}"
         )
 
+@router.get("/get_sheet")
+async def get_sheet(user_id: dict = Depends(get_current_user)):
+    try:
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found.")
+        overall_nutrient_intake_sheet = {nutrient: [0] * payload.time_frame for nutrient in nutrients_list}
+        
+        return {"sheet": overall_nutrient_intake_sheet}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while getting sheet: {str(e)}"
+        )
+    
+
 @router.post('/query')
 async def query(payload: Query,user_id: dict = Depends(get_current_user)):
     '''
