@@ -1,14 +1,12 @@
 import json
-from dotenv import load_dotenv
-import os
-load_dotenv()
-from groq import Groq
-from datetime import datetime, timedelta,date
-import random
 import math
+import random
+from groq import Groq
+from config import settings
 from json_repair import repair_json
+from datetime import datetime, timedelta,date
 
-api_keys = json.loads(os.getenv("API_KEYS"))
+api_keys = settings.API_KEYS
 
 # utility functions
 
@@ -54,19 +52,19 @@ def update(overall_nutrient_intake_sheet,nutrient_sheet_per_food_item):
 # agents
 
 def nutri_orchestrator(user_query):
-    classification_prompt = os.getenv("CLASSIFICATION_PROMPT").format(user_query=user_query)
-    classification_system_message = os.getenv("CLASSIFICATION_SYSTEM_PROMPT")
-    return query(system_message=classification_system_message, user_query=classification_prompt)
+    classification_prompt = settings.CLASSIFICATION_PROMPT.format(user_query=user_query)
+    classification_system_prompt = settings.CLASSIFICATION_SYSTEM_PROMPT
+    return query(system_message=classification_system_prompt, user_query=classification_prompt)
 
 def omni_knowledge_bot(user_query):
-    omni_knowledge_bot_prompt = os.getenv("OMNI_KNOWLEDGE_BOT_PROMPT").format(user_query=user_query)
-    omni_knowledge_bot_system_message = os.getenv("OMNI_KNOWLEDGE_BOT_SYSTEM_MESSAGE")
-    return query(system_message=omni_knowledge_bot_system_message, user_query=omni_knowledge_bot_prompt)
+    omni_knowledge_bot_prompt = settings.OMNI_KNOWLEDGE_BOT_PROMPT.format(user_query=user_query)
+    omni_knowledge_bot_system_prompt = settings.OMNI_KNOWLEDGE_BOT_SYSTEM_PROMPT
+    return query(system_message=omni_knowledge_bot_system_prompt, user_query=omni_knowledge_bot_prompt)
 
 def nutri_scanner(nutrient_sheet_per_food_item, user_query):
-    nutriscanner_prompt = os.getenv("NUTRISCANNER_PROMPT").format(user_query=user_query,nutrient_sheet_per_food_item=nutrient_sheet_per_food_item)
-    nutriscanner_system_message = os.getenv("NUTRISCANNER_SYSTEM_MESSAGE")
-    return query(system_message=nutriscanner_system_message, user_query=nutriscanner_prompt)
+    nutriscanner_prompt = settings.NUTRISCANNER_PROMPT.format(user_query=user_query,nutrient_sheet_per_food_item=nutrient_sheet_per_food_item)
+    nutriscanner_system_prompt = settings.NUTRISCANNER_SYSTEM_PROMPT
+    return query(system_message=nutriscanner_system_prompt, user_query=nutriscanner_prompt)
 
 def gap_detector(overall_nutrient_intake_sheet,balanced_diet_sheet):
   gap_sheet = {}
@@ -76,20 +74,20 @@ def gap_detector(overall_nutrient_intake_sheet,balanced_diet_sheet):
   return gap_sheet
 
 def diet_builder(gap_sheet):
-    diet_builder_prompt = os.getenv("DIET_BUILDER_PROMPT").format(gap_sheet=gap_sheet)
-    diet_builder_system_message = os.getenv("DIET_BUILDER_SYSTEM_MESSAGE")
-    return query(system_message=diet_builder_system_message, user_query=diet_builder_prompt)
+    diet_builder_prompt = settings.DIET_BUILDER_PROMPT.format(gap_sheet=gap_sheet)
+    diet_builder_system_prompt = settings.DIET_BUILDER_SYSTEM_PROMPT
+    return query(system_message=diet_builder_system_prompt, user_query=diet_builder_prompt)
 
 def nutri_reflector(gap_sheet):
-    nutri_reflector_prompt = os.getenv("NUTRI_REFLECTOR_PROMPT").format(gap_sheet=gap_sheet)
-    nutri_reflector_system_message = os.getenv("NUTRI_REFLECTOR_SYSTEM_MESSAGE")
-    return query(system_message=nutri_reflector_system_message, user_query=nutri_reflector_prompt)
+    nutri_reflector_prompt = settings.NUTRI_REFLECTOR_PROMPT.format(gap_sheet=gap_sheet)
+    nutri_reflector_system_prompt = settings.NUTRI_REFLECTOR_SYSTEM_PROMPT
+    return query(system_message=nutri_reflector_system_prompt, user_query=nutri_reflector_prompt)
 
 def missy_monitor(days_skipped):
     days_string = ", ".join(str(d) for d in days_skipped)
-    missy_monitor_prompt = os.getenv("MISSY_MONITOR_PROMPT").format(days_string=days_string)
-    missy_monitor_system_message = os.getenv("MISSY_MONITOR_SYSTEM_MESSAGE")
-    return query(system_message=missy_monitor_system_message, user_query=missy_monitor_prompt)
+    missy_monitor_prompt = settings.MISSY_MONITOR_PROMPT.format(days_string=days_string)
+    missy_monitor_system_prompt = settings.MISSY_MONITOR_SYSTEM_PROMPT
+    return query(system_message=missy_monitor_system_prompt, user_query=missy_monitor_prompt)
 
 def calculate_diet_score_with_penalty(
     overall_nutrient_intake_sheet,

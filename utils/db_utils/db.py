@@ -1,8 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
-import os
-load_dotenv()
+from config import load_config
+config = load_config()
 
-client = AsyncIOMotorClient(os.getenv("MONGOURL"))
-
+client = AsyncIOMotorClient(config.MONGOURL)
 db=client["dietvite"]

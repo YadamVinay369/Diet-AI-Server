@@ -1,10 +1,8 @@
 import jwt
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
-import os
-load_dotenv()
+from config import settings
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

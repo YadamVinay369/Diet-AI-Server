@@ -4,11 +4,9 @@ from utils.db_utils.db import db
 from pydantic import BaseModel, Field
 from datetime import datetime,timedelta,date
 from bson import ObjectId
-from dotenv import load_dotenv
-load_dotenv()
-import os
 import json
 from utils.llm_utils.agents import nutri_orchestrator,omni_knowledge_bot,nutri_scanner,gap_detector,diet_builder,nutri_reflector,clean_json,missy_monitor,calculate_diet_score_with_penalty
+from config import settings
 
 router = APIRouter()
 
@@ -27,7 +25,7 @@ async def start(payload: TimeFrame,user_id: dict = Depends(get_current_user)):
         
         user["start_date"] = datetime.utcnow()
         user["time_frame"] = payload.time_frame
-        nutrients_list = json.loads(os.getenv("NUTRIENTS_LIST"))
+        nutrients_list = settings.NUTRIENTS_LIST
         overall_nutrient_intake_sheet = {nutrient: [0] * payload.time_frame for nutrient in nutrients_list}
         user["overall_nutrient_sheet"] = overall_nutrient_intake_sheet
         user["attendance" ] = [False] * payload.time_frame
@@ -63,7 +61,6 @@ async def get_user_stats(user_id: dict = Depends(get_current_user)):
             detail=f"An error occurred while getting sheet: {str(e)}"
         )
     
-
 @router.post('/query')
 async def query(payload: Query,user_id: dict = Depends(get_current_user)):
     '''
@@ -80,16 +77,20 @@ async def query(payload: Query,user_id: dict = Depends(get_current_user)):
         if isinstance(initial_response,str):
             initial_response = initial_response.strip().lower()
         if initial_response == "yes":
-            json_output = nutri_scanner(nutrient_sheet_per_food_item=os.getenv("NUTRIENT_SHEET_PER_FOOD_ITEM"),user_query=payload.query)
+            json_output = nutri_scanner(nutrient_sheet_per_food_item=settings.NUTRIENT_SHEET_PER_FOOD_ITEM,user_query=payload.query)
             try:
                 cleaned_json_output,remarks = clean_json(json_output)
             except Exception as e:
                 raise ValueError("Error during cleaning: ",e)
             try:
-                for key,val in cleaned_json_output.items():
-                    index = (datetime.today()-user["start_date"]).days
-                    user["overall_nutrient_sheet"][key][index] += val
                 index = (datetime.today()-user["start_date"]).days
+                if index >= user["time_frame"]:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Tracking period has ended. Please restart tracking."
+                    )
+                for key,val in cleaned_json_output.items():
+                    user["overall_nutrient_sheet"][key][index] += val
                 user["attendance"][index] = True
                 user["frequency"][index] = user["frequency"][index] + 1
                 await db.users.replace_one(
@@ -125,7 +126,7 @@ async def diet_suggestions(user_id: dict = Depends(get_current_user)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
         try:            
-            gap_sheet = gap_detector(overall_nutrient_intake_sheet=user["overall_nutrient_sheet"],balanced_diet_sheet=json.loads(os.getenv("BALANCED_DIET_SHEET")))
+            gap_sheet = gap_detector(overall_nutrient_intake_sheet=user["overall_nutrient_sheet"],balanced_diet_sheet=settings.BALANCED_DIET_SHEET)
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
         response = diet_builder(gap_sheet=gap_sheet)
@@ -146,7 +147,7 @@ async def review(user_id: dict = Depends(get_current_user)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
         try:            
-            gap_sheet = gap_detector(overall_nutrient_intake_sheet=user["overall_nutrient_sheet"],balanced_diet_sheet=json.loads(os.getenv("BALANCED_DIET_SHEET")))
+            gap_sheet = gap_detector(overall_nutrient_intake_sheet=user["overall_nutrient_sheet"],balanced_diet_sheet=settings.BALANCED_DIET_SHEET)
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
         response = nutri_reflector(gap_sheet=gap_sheet)
@@ -229,7 +230,7 @@ async def score_calculator(user_id: dict = Depends(get_current_user)):
             ]
             frequency_of_missing = len(miss_dates)
             overall_nutrient_intake_sheet = user["overall_nutrient_sheet"]
-            score,cheat_dates = calculate_diet_score_with_penalty(overall_nutrient_intake_sheet=overall_nutrient_intake_sheet,balanced_diet_sheet=json.loads(os.getenv("BALANCED_DIET_SHEET")),daily_frequency_list=user["frequency"],frequency_of_missing=frequency_of_missing,start_date=start_date)
+            score,cheat_dates = calculate_diet_score_with_penalty(overall_nutrient_intake_sheet=overall_nutrient_intake_sheet,balanced_diet_sheet=settings.BALANCED_DIET_SHEET,daily_frequency_list=user["frequency"],frequency_of_missing=frequency_of_missing,start_date=start_date)
             return {"score_calculator" : score,"dates in which you have cheated" : cheat_dates}
         except Exception as e:
             raise ValueError("Error in score calculator: ",e)
