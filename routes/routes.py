@@ -48,15 +48,15 @@ async def start(payload: TimeFrame,user_id: dict = Depends(get_current_user)):
             detail=f"An error occurred at start: {str(e)}"
         )
 
-@router.get("/get_sheet")
-async def get_sheet(user_id: dict = Depends(get_current_user)):
+@router.get("/get_user_stats")
+async def get_user_stats(user_id: dict = Depends(get_current_user)):
     try:
         user = await db.users.find_one({"_id": ObjectId(user_id)})
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
-        overall_nutrient_intake_sheet = {nutrient: [0] * payload.time_frame for nutrient in nutrients_list}
-        
-        return {"sheet": overall_nutrient_intake_sheet}
+        user["_id"] = str(user["_id"])
+        return {"user_details": user}
+        return {"user_details": user}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -95,13 +95,16 @@ async def query(payload: Query,user_id: dict = Depends(get_current_user)):
                 await db.users.replace_one(
                     {"_id": ObjectId(user_id)},
                     user,
-                    upsert=True
                 )
                 user["_id"] = str(user["_id"])
                 user["start_date"] = user["start_date"].isoformat()
             except Exception as e:
                 raise ValueError("Error while modifying overall nutrient sheet: ",e)
-            return {"nutri_scanner":remarks,"updated_user_details":user}
+            if isinstance(remarks, dict) and "remarks" in remarks:
+                final_text = remarks["remarks"]
+            else:
+                final_text = remarks
+            return {"nutri_scanner": final_text,"updated_user_details":user}
         else:
             response = omni_knowledge_bot(user_query=payload.query)
             return {"omni_knowledge_bot":response}

@@ -3,8 +3,8 @@ from typing import Optional, Dict,List, Any
 from datetime import date
 
 class UserBase(BaseModel):
-    username: Optional[str] = Field(None, min_length=3, max_length=50)
-    email: EmailStr = Field(...,description="email is a required.")
+    username: str = Field(..., min_length=3, max_length=50)
+    email: Optional[EmailStr] = Field(None,description="email is a required.")
     
 class UserCreate(UserBase):
     password: str = Field(...,min_length=6)
