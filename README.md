@@ -151,8 +151,8 @@ Our scoring system is designed to be **strict, fair, and resistant to manipulati
 
 ## 👥 Contributors
 
-- Vinay Yadam
-- Vethan Yadam
+- [Vinay Yadam](https://github.com/YadamVinay369)
+- [Vethan Yadam](https://github.com/vethan143)
 
 ---
 
