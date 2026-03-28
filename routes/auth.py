@@ -1,5 +1,5 @@
 import bcrypt
-from schemas.user import UserCreate, UserPublic
+from schemas.user import UserCreate, UserPublic, UserLogin
 from utils.db_utils.db import db
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException
@@ -22,8 +22,31 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 @router.post("/signup") 
 async def signup(user: UserCreate):
-    if await db.users.find_one({"username": user.username}):
-        raise HTTPException(status_code=400, detail="User already exists.")
+    if user.username:
+        existing_user = await db.users.find_one({
+            "$or": [
+                {"username": user.username},
+                {"email": user.email}
+            ]
+        })
+    else:
+        # Case 2: only email
+        existing_user = await db.users.find_one({
+            "email": user.email
+        })
+
+    if existing_user:
+        if user.username and existing_user.get("username") == user.username:
+            raise HTTPException(
+                status_code=400,
+                detail="User already exists with the same username"
+            )
+        
+        if existing_user.get("email") == user.email:
+            raise HTTPException(
+                status_code=400,
+                detail="User already exists with the same email"
+            )
     
     hashed_pw = hash_password(user.password)
     
@@ -61,12 +84,15 @@ async def signup(user: UserCreate):
     return response
 
 @router.post("/login")
-async def login(user: UserCreate):
-    db_user = await db.users.find_one({"username": user.username})
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found!")
+async def login(user: UserLogin):
+    db_user = await db.users.find_one({
+        "$or": [
+            {"username": user.user_name_or_email},
+            {"email": user.user_name_or_email}
+        ]
+    })
     
-    if not verify_password(user.password, db_user["hashed_password"]):
+    if not db_user or not verify_password(user.password, db_user["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid Credentials") 
     
     access_token = create_access_token(data={"sub": str(db_user["_id"])})
@@ -93,7 +119,7 @@ async def login(user: UserCreate):
     )
     return response
 
-@router.post("/logout")
+@router.get("/logout")
 async def logout():
     response = JSONResponse(content={"message": "Logged out successfully!"})
     response.delete_cookie(

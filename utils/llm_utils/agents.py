@@ -135,9 +135,9 @@ def calculate_diet_score_with_penalty(
                     penalty_factor *= (1 + overshoot_factor ** 2)
 
                 # ✅ Mark cheating day
-                # if actual / ideal_val >= cheat_threshold_over:
-                #     day = (start_dt + timedelta(days=day_idx)).strftime("%d-%m-%Y")
-                #     cheat_days.add(day)
+                if actual / ideal_val >= cheat_threshold_over:
+                    day = (start_dt + timedelta(days=day_idx)).strftime("%d-%m-%Y")
+                    cheat_days.add(day)
 
             score = math.exp(-penalty_factor * deviation_ratio) 
             day_scores.append(score) 

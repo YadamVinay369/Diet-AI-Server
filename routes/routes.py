@@ -41,6 +41,7 @@ async def start(payload: TimeFrame,user_id: dict = Depends(get_current_user)):
         
         return {"message": "Time frame updated","updated user details":user}
     except Exception as e:
+        print(f"An error occurred at start: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred at start: {str(e)}"
@@ -56,6 +57,7 @@ async def get_user_stats(user_id: dict = Depends(get_current_user)):
         return {"user_details": user}
         return {"user_details": user}
     except Exception as e:
+        print(f"An error occurred while getting sheet: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while getting sheet: {str(e)}"
@@ -110,9 +112,10 @@ async def query(payload: Query,user_id: dict = Depends(get_current_user)):
             response = omni_knowledge_bot(user_query=payload.query)
             return {"omni_knowledge_bot":response}
     except Exception as e:
+        print(f"An error occurred while querying: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred: {str(e)}"
+            detail=f"An error occurred while querying: {str(e)}"
         )
 
 @router.get('/diet_suggestions')
@@ -132,6 +135,7 @@ async def diet_suggestions(user_id: dict = Depends(get_current_user)):
         response = diet_builder(gap_sheet=gap_sheet)
         return {"diet_builder":response}
     except Exception as e:
+        print(f"An error occurred in dietbuilder: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred in dietbuilder: {str(e)}"
@@ -153,6 +157,7 @@ async def review(user_id: dict = Depends(get_current_user)):
         response = nutri_reflector(gap_sheet=gap_sheet)
         return {"nutri_reflector":response}
     except Exception as e:
+        print(f"An error occurred review: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred review: {str(e)}"
@@ -176,6 +181,7 @@ async def reset(user_id: dict = Depends(get_current_user)):
         user["_id"] = str(user["_id"])
         return {"reset_status":True,"updated_user_details":user}
     except Exception as e:
+        print(f"An error occurred at reset: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred at reset: {str(e)}"
@@ -208,6 +214,7 @@ async def check_skips(user_id: dict = Depends(get_current_user)):
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
     except Exception as e:
+        print(f"An error occurred check skips: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred check skips: {str(e)}"
@@ -235,6 +242,7 @@ async def score_calculator(user_id: dict = Depends(get_current_user)):
         except Exception as e:
             raise ValueError("Error in score calculator: ",e)
     except Exception as e:
+        print(f"An error occurred review: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred review: {str(e)}"

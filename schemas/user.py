@@ -3,8 +3,8 @@ from typing import Optional, Dict,List, Any
 from datetime import date
 
 class UserBase(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50)
-    email: Optional[EmailStr] = Field(None,description="email is a required.")
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    email: EmailStr
     
 class UserCreate(UserBase):
     password: str = Field(...,min_length=6)
@@ -25,3 +25,7 @@ class UserPublic(UserBase):
     overall_nutrient_sheet: Optional[Dict[str, Any]] = Field(default=None)
     attendance: Optional[List[bool]] = Field(default=None)
     frequency: Optional[List[int]] = Field(default=None)
+    
+class UserLogin(BaseModel):
+    user_name_or_email: str
+    password: str
