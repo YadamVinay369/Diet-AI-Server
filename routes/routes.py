@@ -107,10 +107,10 @@ async def query(payload: Query,user_id: dict = Depends(get_current_user)):
                 final_text = remarks["remarks"]
             else:
                 final_text = remarks
-            return {"nutri_scanner": final_text,"updated_user_details":user}
+            return {"nutri_scanner": final_text, 'agent_name' : 'nutri_orchestrator'}
         else:
             response = omni_knowledge_bot(user_query=payload.query)
-            return {"omni_knowledge_bot":response}
+            return {"omni_knowledge_bot":response,'agent_name':'omni_knowledge_bot'}
     except Exception as e:
         print(f"An error occurred while querying: {str(e)}")
         raise HTTPException(
@@ -133,7 +133,7 @@ async def diet_suggestions(user_id: dict = Depends(get_current_user)):
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
         response = diet_builder(gap_sheet=gap_sheet)
-        return {"diet_builder":response}
+        return {"diet_builder":response, "agent_name" : 'diet_builder'}
     except Exception as e:
         print(f"An error occurred in dietbuilder: {str(e)}")
         raise HTTPException(
@@ -155,7 +155,7 @@ async def review(user_id: dict = Depends(get_current_user)):
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
         response = nutri_reflector(gap_sheet=gap_sheet)
-        return {"nutri_reflector":response}
+        return {"nutri_reflector":response,"agent_name" : 'nutri_reflector'}
     except Exception as e:
         print(f"An error occurred review: {str(e)}")
         raise HTTPException(
@@ -206,11 +206,11 @@ async def check_skips(user_id: dict = Depends(get_current_user)):
                 miss_dates_str = [d.strftime("%d-%m-%Y") for d in miss_dates]
                 try:
                     comments = missy_monitor(miss_dates_str)
-                    return {"Miss_Flag":True,"missy_monitor":comments}
+                    return {"Miss_Flag":True,"missy_monitor":comments,'agent_name':'missy_monitor'}
                 except Exception as e:
                     raise ValueError("Error in missy_monitor: ",e) 
             else:
-                return {"Miss_Flag":False,"missy_monitor":"Kudos! for your discipline!"}
+                return {"Miss_Flag":False,"missy_monitor":"Kudos! for your discipline!",'agent_name':'missy_monitor'}
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
     except Exception as e:
