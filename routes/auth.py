@@ -74,10 +74,10 @@ async def signup(user: UserCreate):
     
     response.set_cookie(
         key="access_token",
-        value=access_token, # Consistent without 'Bearer' for easier decoding
+        value=access_token,
         httponly=True,
-        samesite="lax",
-        secure=False, 
+        samesite="None",
+        secure=True,
         max_age=60*60*24,
         path="/",
     )
@@ -112,8 +112,8 @@ async def login(user: UserLogin):
         key="access_token",
         value=access_token,
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="None",
+        secure=True,
         max_age=60*60*24,
         path="/",
     )
