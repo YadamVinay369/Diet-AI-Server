@@ -85,7 +85,7 @@ async def query(payload: Query,user_id: dict = Depends(get_current_user)):
             except Exception as e:
                 raise ValueError("Error during cleaning: ",e)
             try:
-                index = (datetime.today()-user["start_date"]).days
+                index = (datetime.today().date() - user["start_date"].date()).days
                 if index >= user["time_frame"]:
                     raise HTTPException(
                         status_code=400,
@@ -107,10 +107,10 @@ async def query(payload: Query,user_id: dict = Depends(get_current_user)):
                 final_text = remarks["remarks"]
             else:
                 final_text = remarks
-            return {"nutri_scanner": final_text,"updated_user_details":user}
+            return {"agent_used": "nutri_scanner","output":{"nutri_scanner": final_text,"updated_user_details":user}}
         else:
             response = omni_knowledge_bot(user_query=payload.query)
-            return {"omni_knowledge_bot":response}
+            return {"agent_used": "omni_knowledge_bot","output":{"omni_knowledge_bot":response}}
     except Exception as e:
         print(f"An error occurred while querying: {str(e)}")
         raise HTTPException(
@@ -133,7 +133,7 @@ async def diet_suggestions(user_id: dict = Depends(get_current_user)):
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
         response = diet_builder(gap_sheet=gap_sheet)
-        return {"diet_builder":response}
+        return {"agent_used": "diet_builder","output":{"diet_builder":response}}
     except Exception as e:
         print(f"An error occurred in dietbuilder: {str(e)}")
         raise HTTPException(
@@ -155,7 +155,7 @@ async def review(user_id: dict = Depends(get_current_user)):
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
         response = nutri_reflector(gap_sheet=gap_sheet)
-        return {"nutri_reflector":response}
+        return {"agent_used": "nutri_reflector","output":{"nutri_reflector":response}}
     except Exception as e:
         print(f"An error occurred review: {str(e)}")
         raise HTTPException(
@@ -206,11 +206,11 @@ async def check_skips(user_id: dict = Depends(get_current_user)):
                 miss_dates_str = [d.strftime("%d-%m-%Y") for d in miss_dates]
                 try:
                     comments = missy_monitor(miss_dates_str)
-                    return {"Miss_Flag":True,"missy_monitor":comments}
+                    return {"agent_used": "missy_monitor","output":{"Miss_Flag":True,"missy_monitor":comments}}
                 except Exception as e:
                     raise ValueError("Error in missy_monitor: ",e) 
             else:
-                return {"Miss_Flag":False,"missy_monitor":"Kudos! for your discipline!"}
+                return {"agent_used": "missy_monitor","output":{"Miss_Flag":False,"missy_monitor":"Kudos! for your discipline!"}}
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
     except Exception as e:
