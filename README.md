@@ -1,8 +1,8 @@
-# DietVite Server
+# Diet-AI Server
 
-- DietVite helps the user to track the nutrient intake by taking inputs from the user and guide the user to maintain a balanced diet.
-- DietVite leverages **AI Agents** to take smart decisions.
-- At the beginning, user will be asked with a timeframe. Once timeframe is set, then DietVite will track the user and guide the user towards balanced diet over that timeframe.
+- Diet-AI helps the user to track the nutrient intake by taking inputs from the user and guide the user to maintain a balanced diet.
+- Diet-AI leverages **AI Agents** to take smart decisions.
+- At the beginning, user will be asked with a timeframe. Once timeframe is set, then Diet-AI will track the user and guide the user towards balanced diet over that timeframe.
 - **Score** is provided to each user based on the current performance. Our **Scoring Algorithm** is very strict. So there won't be any chance to cheat.
 
 **YOU CAN'T CHEAT!**
@@ -11,8 +11,8 @@
 
 - User can give food intake information in the form of query. Eg: "Hey Today I ate Idli with coconut chutney."
 - User can ask any kind of food related questions, or any kind of generic questions or can have normal chit-chat.
-- User can ask for diet-suggestions. **Agent** analyses the current nutrient intake levels and suggests some foods to consume to move a step towards balanced diet.
-- User can ask for the review. **Agent** analyses the current nutrient intake levels and passes comments about the current performance.
+- User can ask for diet-suggestions. **Diet Builder Agent** analyses the current nutrient intake levels and suggests some foods to consume to move a step towards balanced diet.
+- User can ask for the review. **Nutri Reflector Agent** analyses the current nutrient intake levels and passes comments about the current performance.
 
 Hosted Server Link: https://dietvite-server.onrender.com/
 
@@ -142,7 +142,7 @@ Our scoring system is designed to be **strict, fair, and resistant to manipulati
 - `Nutri Scanner` - analyses the nutrients consumed based on the food intake query passed by the user and updates the overall nutrient sheet values for that user.
 - `Diet Builder` - analyses the gap between current nutrient consumed and balanced diet levels and suggest food to move towards the balanced diet.
 - `Nutri Reflector` - reviews the current nutrient intake levels and passes down the comments regarding your performance.
-- `Missy monitor` - scolds the user if the user missed to provide info about the food consumed on any date.
+- `Missy Monitor` - scolds the user if the user missed to provide info about the food consumed on any date.
 
 ---
 
