@@ -14,7 +14,7 @@
 - User can ask for diet-suggestions. **Diet Builder Agent** analyses the current nutrient intake levels and suggests some foods to consume to move a step towards balanced diet.
 - User can ask for the review. **Nutri Reflector Agent** analyses the current nutrient intake levels and passes comments about the current performance.
 
-Hosted Server Link: https://dietvite-server.onrender.com/
+Hosted Server Link: https://diet-ai-server-kju8.onrender.com
 
 ---
 
@@ -117,7 +117,7 @@ Our scoring system is designed to be **strict, fair, and resistant to manipulati
 
 ### How to use the APIs?
 
-- Paste the [hosted server link](https://dietvite-server.onrender.com/) in the browser and add "/docs" at the end of the link and click on it.
+- Paste the [hosted server link](https://diet-ai-server-kju8.onrender.com) in the browser and add "/docs" at the end of the link and click on it.
 - It will lead you to the Swagger UI where you can play around with the APIs.
 
 ### List of APIs

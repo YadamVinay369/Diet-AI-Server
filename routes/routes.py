@@ -70,6 +70,7 @@ async def get_user_stats(user_id: dict = Depends(get_current_user)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
         user["_id"] = str(user["_id"])
+        user["balanced_diet_sheet"] = settings.BALANCED_DIET_SHEET
         return {"user_details": user}
         return {"user_details": user}
     except Exception as e:
