@@ -1,3 +1,4 @@
+import re
 import json
 import math
 import random
@@ -9,6 +10,9 @@ from datetime import datetime, timedelta,date
 api_keys = settings.API_KEYS
 
 # utility functions
+
+def strip_units(nutrient):
+    return re.sub(r"\s*\(.*?\)", "", nutrient).strip()
 
 def query(system_message, user_query):
     try:
@@ -24,7 +28,7 @@ def query(system_message, user_query):
         response = client.chat.completions.create(
             model=models[random_index_model],
             messages=messages,
-            temperature=0.6
+            temperature=0.8
         )
 
         return response.choices[0].message.content
@@ -41,6 +45,15 @@ def clean_json(response: str) -> dict:
     cleaned = response.replace("```json", "").replace("```", "").strip()
     repaired = repair_json(cleaned)
     return json.loads(repaired)
+
+def clean_nutrients_units(data):
+    cleaned = {}
+
+    for food, nutrients in data.items():
+        cleaned_nutrients = [strip_units(n) for n in nutrients]
+        cleaned[food] = cleaned_nutrients
+
+    return cleaned
 
 def update(overall_nutrient_intake_sheet,nutrient_sheet_per_food_item):
 
@@ -73,10 +86,14 @@ def gap_detector(overall_nutrient_intake_sheet,balanced_diet_sheet):
     gap_sheet[key]=value - sum(intake_list) / len(intake_list) if intake_list else 0
   return gap_sheet
 
-def diet_builder(gap_sheet):
-    diet_builder_prompt = settings.DIET_BUILDER_PROMPT.format(gap_sheet=gap_sheet)
+def diet_builder(gap_sheet,category):
+    nutrient_list = list(gap_sheet.keys())
+    diet_builder_prompt = settings.DIET_BUILDER_PROMPT.format(gap_sheet=gap_sheet,category=category,nutrient_list=nutrient_list)
     diet_builder_system_prompt = settings.DIET_BUILDER_SYSTEM_PROMPT
-    return query(system_message=diet_builder_system_prompt, user_query=diet_builder_prompt)
+    response = query(system_message=diet_builder_system_prompt, user_query=diet_builder_prompt)
+    result = clean_json(response=response)
+    result = clean_nutrients_units(result)
+    return result
 
 def nutri_reflector(gap_sheet):
     nutri_reflector_prompt = settings.NUTRI_REFLECTOR_PROMPT.format(gap_sheet=gap_sheet)

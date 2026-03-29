@@ -1,23 +1,38 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from utils.auth_utils.route_checkup import get_current_user
+import json
+from bson import ObjectId
+from typing import Literal
+from config import settings
 from utils.db_utils.db import db
 from pydantic import BaseModel, Field
 from datetime import datetime,timedelta,date
-from bson import ObjectId
-import json
-from utils.llm_utils.agents import nutri_orchestrator,omni_knowledge_bot,nutri_scanner,gap_detector,diet_builder,nutri_reflector,clean_json,missy_monitor,calculate_diet_score_with_penalty
-from config import settings
+from fastapi import APIRouter, Depends, HTTPException, status
+from utils.auth_utils.route_checkup import get_current_user
+
+from utils.llm_utils.agents import (
+    nutri_orchestrator,
+    omni_knowledge_bot,
+    nutri_scanner,
+    gap_detector,
+    diet_builder,
+    nutri_reflector,
+    clean_json,
+    missy_monitor,
+    calculate_diet_score_with_penalty
+)
 
 router = APIRouter()
 
 class Query(BaseModel):
     query: str
     
-class TimeFrame(BaseModel):
+class Start_Input(BaseModel):
     time_frame: int = Field(...,ge=1)
+    category: Literal["vegetarian", "non_vegetarian", "vegan", "omnivore"] = Field(
+        default="omnivore"
+    )
 
 @router.post('/start')
-async def start(payload: TimeFrame,user_id: dict = Depends(get_current_user)):
+async def start(payload: Start_Input,user_id: dict = Depends(get_current_user)):
     try:
         user = await db.users.find_one({"_id": ObjectId(user_id)})
         if not user:
@@ -30,6 +45,7 @@ async def start(payload: TimeFrame,user_id: dict = Depends(get_current_user)):
         user["overall_nutrient_sheet"] = overall_nutrient_intake_sheet
         user["attendance" ] = [False] * payload.time_frame
         user["frequency"] = [0] * payload.time_frame
+        user["category"] = payload.category
         
         await db.users.replace_one(
             {"_id": ObjectId(user_id)},
@@ -132,7 +148,8 @@ async def diet_suggestions(user_id: dict = Depends(get_current_user)):
             gap_sheet = gap_detector(overall_nutrient_intake_sheet=user["overall_nutrient_sheet"],balanced_diet_sheet=settings.BALANCED_DIET_SHEET)
         except Exception as e:
             raise ValueError("Error in gap_detector: ",e)
-        response = diet_builder(gap_sheet=gap_sheet)
+        response = diet_builder(gap_sheet=gap_sheet,category=user["category"])
+        print(response)
         return {"agent_used": "diet_builder","output":{"diet_builder":response}}
     except Exception as e:
         print(f"An error occurred in dietbuilder: {str(e)}")
