@@ -126,8 +126,8 @@ async def logout():
         key="access_token",
         path="/",
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="None",
+        secure=True,
     )
     
     return response
